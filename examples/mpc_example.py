@@ -45,7 +45,7 @@ class MpcExample(object):
 
     def set_mpc_parameter(self):
         self._planner.setObstacles(self._obstacles, self._r_body)
-        self._planner.setGoal(self._goal)
+        self._planner.setGoal(self._goal.primary_goal().position())
         if hasattr(self, '_limits'):#todo also check if they were included in solver
             self._planner.setJointLimits(np.transpose(self._limits))
         if hasattr(self, '_limits_vel'):

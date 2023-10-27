@@ -181,13 +181,13 @@ class MPCPlanner(object):
                     self._npar * i + self._paramMap["upper_limits_u"][j]
                 ] = limits_u[1][j]
 
-    def setGoal(self, goal):
+    def setGoal(self, goal_position):
         for i in range(self._config.time_horizon):
             for j in range(self.m()):
-                if j >= len(goal.primary_goal().position()):
+                if j >= len(goal_position): #goal.primary_goal().position()):
                     position = 0
                 else:
-                    position = goal.primary_goal().position()[j]
+                    position = goal_position[j] # goal.primary_goal().position()[j]
                 self._params[self._npar * i + self._paramMap["g"][j]] = position
     def concretize(self):
         pass

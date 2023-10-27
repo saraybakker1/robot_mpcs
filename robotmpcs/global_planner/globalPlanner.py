@@ -4,13 +4,15 @@ from robotmpcs.global_planner.a_star import a_star
 from robotmpcs.global_planner.gridmap import OccupancyGridMap
 
 class GlobalPlanner(object):
-    def __init__(self, dim_pixels, limits_low, limits_high, BOOL_PLOTTING=True, threshold=0.2):
+    def __init__(self, dim_pixels, limits_low, limits_high, BOOL_PLOTTING=True, threshold=0.2, threshold_local_goal=1.3):
         self.dim_pixels = dim_pixels
         self.limits_high = limits_high
         self.limits_low = limits_low
         self.dim_meters = -limits_low + limits_high
         self.cell_size_xyz = self.dim_meters/dim_pixels
         self.threshold = threshold
+        self.idx_local = 0
+        self.threshold_local_goal = threshold_local_goal
 
         # dimension of cell must be the same in x and y direction:
         if self.cell_size_xyz[0] == self.cell_size_xyz[1]:
@@ -115,3 +117,25 @@ class GlobalPlanner(object):
             self.plot_occupancy_map_and_path(path=path_px, gmap=gmap, start_pos=start_pos, goal_pos=goal_pos)
         path_converted = self.convert_path(path)
         return path_converted, path_px
+
+    def get_distance_points(self, position1, position2):
+        distance = np.sqrt((position2[0]-position1[0])**2 + (position2[1]-position1[1])**2)
+        return distance
+
+    def get_local_goal(self, position, path):
+        """
+        Gets the local goal on the global path that is closer then x meters
+        - closer then x meters
+        - not going backwards along the path
+        Only update when the final node is not reached.
+        Returns the (x, y) coordinates of the local path
+        """
+        distance_pos_path = self.get_distance_points(position, path[self.idx_local])
+
+        if self.idx_local < len(path) and len(path)>0: #Only update when not at final node
+            if distance_pos_path <= self.threshold_local_goal:
+                self.idx_local = self.idx_local + 1
+
+        local_goal = path[self.idx_local]
+        return local_goal
+
